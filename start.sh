@@ -10,7 +10,8 @@ APP_NAME="Olmo Studio"
 APP_ENV=production
 APP_KEY=${APP_KEY}
 APP_DEBUG=false
-APP_URL=https://${RAILWAY_PUBLIC_DOMAIN:-localhost}
+APP_URL=https://${RAILWAY_PUBLIC_DOMAIN:-baza-api-production.up.railway.app}
+ASSET_URL=https://${RAILWAY_PUBLIC_DOMAIN:-baza-api-production.up.railway.app}
 
 DB_CONNECTION=mysql
 DB_HOST=${MYSQLHOST:-mysql.railway.internal}
@@ -65,22 +66,6 @@ try {
 # Выполняем миграции
 echo "Running migrations..."
 php artisan migrate --force --no-interaction
-
-# Заполняем тестовые данные
-echo "Checking if seeding is needed..."
-php artisan tinker --execute="
-try {
-    if (\App\Models\Film::count() === 0) {
-        echo 'Seeding database...\n';
-        Artisan::call('db:seed', ['--class' => 'BazaSeeder', '--force' => true]);
-        echo 'Seeding completed.\n';
-    } else {
-        echo 'Database already has data.\n';
-    }
-} catch (Exception \$e) {
-    echo 'Seed error: ' . \$e->getMessage() . '\n';
-}
-"
 
 # Кэширование
 echo "Caching configuration..."
