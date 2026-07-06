@@ -1,14 +1,8 @@
 #!/bin/bash
 
-# Диагностика прав
-echo "=== CHECKING PERMISSIONS ==="
-ls -la storage/
-ls -la bootstrap/cache/
-echo "============================"
-
 # Устанавливаем переменные окружения
 export APP_ENV=production
-export APP_DEBUG=false
+export APP_DEBUG=false  # Верните в false после проверки
 
 # Создаём .env файл
 cat > .env << EOF
@@ -30,18 +24,45 @@ SESSION_DRIVER=file
 QUEUE_CONNECTION=sync
 
 LOG_CHANNEL=stderr
-LOG_LEVEL=debug
+LOG_LEVEL=error
 EOF
 
-# Миграции
-echo "Running migrations..."
-php artisan migrate --force --no-interaction 2>&1 || echo "MIGRATION FAILED!"
+# ВАЖНО: Ждём, пока MySQL будет готов
+echo "Waiting for MySQL to be ready..."
+sleep 5
 
-# Проверяем, может ли Laravel писать
-echo "Testing write permissions..."
-php artisan config:cache && echo "Config cache OK" || echo "Config cache FAILED"
-php artisan route:cache && echo "Route cache OK" || echo "Route cache FAILED"
-php artisan view:cache && echo "View cache OK" || echo "View cache FAILED"
+# Проверяем подключение к БД
+php artisan tinker --execute="
+try {
+    DB::connection()->getPdo();
+    echo 'MySQL connection: OK\n';
+} catch (Exception \$e) {
+    echo 'MySQL connection: FAILED - ' . \$e->getMessage() . '\n';
+    exit(1);
+}
+" || exit 1
+
+# Выполняем миграции
+echo "Running migrations..."
+php artisan migrate --force --no-interaction
+
+# Заполняем тестовые данные (только если таблица films пустая)
+echo "Checking if seeding is needed..."
+php artisan tinker --execute="
+if (\App\Models\Film::count() === 0) {
+    echo 'Seeding database...\n';
+    Artisan::call('db:seed', ['--class' => 'BazaSeeder', '--force' => true]);
+    echo 'Seeding completed.\n';
+} else {
+    echo 'Database already has data, skipping seed.\n';
+}
+"
+
+# Кэширование
+echo "Caching configuration..."
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 
 # Запуск supervisor
 echo "Starting supervisor..."
