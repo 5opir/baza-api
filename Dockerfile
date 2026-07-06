@@ -1,6 +1,6 @@
-FROM php:8.2-fpm
+FROM php:8.4-fpm
 
-# Установка системных зависимостей
+# Установка системных зависимостей (включая libicu для intl)
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -8,14 +8,19 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
+    libicu-dev \
     zip \
     unzip \
     nginx \
     supervisor \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip intl
 
 # Установка Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Разрешаем Composer работать как root (нужно для Railway)
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # Рабочая директория
 WORKDIR /var/www/html
@@ -24,7 +29,7 @@ WORKDIR /var/www/html
 COPY . .
 
 # Установка зависимостей Laravel
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Создание директорий и установка прав
 RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views \
