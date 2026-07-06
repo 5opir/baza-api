@@ -42,12 +42,12 @@ class CommercialResource extends Resource
 
             Forms\Components\Section::make('Медиа')
                 ->schema([
-                    Forms\Components\TextInput::make('thumbnail')
+                    Forms\Components\Textarea::make('thumbnail')
                         ->label('Превью')
                         ->rows(10)
                         ->required()
                         ->helperText('Ссылка на превью'),
-                    Forms\Components\TextInput::make('video_url')
+                    Forms\Components\Textarea::make('video_url')
                         ->label('URL видео')
                         ->url()
                         ->helperText('Ссылка на YouTube или другой видеохостинг'),

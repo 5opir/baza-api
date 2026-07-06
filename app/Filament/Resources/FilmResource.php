@@ -45,12 +45,12 @@ class FilmResource extends Resource
 
             Forms\Components\Section::make('Медиа')
                 ->schema([
-                    Forms\Components\TextInput::make('cover')
+                    Forms\Components\Textarea::make('cover')
                         ->label('Обложка')
                         ->rows(10)
                         ->required()
                         ->helperText('Ссылка на обложку'),
-                    Forms\Components\TextInput::make('poster')
+                    Forms\Components\Textarea::make('poster')
                         ->label('Постер')
                         ->rows(10)
                         ->required()

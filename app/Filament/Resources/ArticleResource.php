@@ -23,11 +23,11 @@ class ArticleResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\TextInput::make('title')
+            Forms\Components\Textarea::make('title')
                 ->label('Заголовок')
                 ->required()
                 ->maxLength(255),
-            Forms\Components\TextInput::make('cover')
+            Forms\Components\Textarea::make('cover')
                 ->label('Обложка')
                 ->rows(10)
                 ->required()
