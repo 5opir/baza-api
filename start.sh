@@ -27,23 +27,35 @@ LOG_CHANNEL=stderr
 LOG_LEVEL=error
 EOF
 
-# ВАЖНО: Очищаем кеш конфига
-echo "Clearing config cache..."
+# Очищаем кеш конфига
+echo "=== Clearing all caches ==="
+rm -rf bootstrap/cache/config.php
+rm -rf bootstrap/cache/routes-v7.php
+rm -rf bootstrap/cache/services.php
 php artisan config:clear
 php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
 
-# Проверяем, что .env создан правильно
-echo "=== .env DB settings ==="
-cat .env | grep -E "^DB_"
-echo "========================"
+# Подставляем PORT в nginx.conf
+export PORT=${PORT:-8080}
+echo "=== Configuring nginx to listen on PORT=$PORT ==="
+envsubst '${PORT}' < /etc/nginx/sites-enabled/default > /etc/nginx/sites-enabled/default.tmp
+mv /etc/nginx/sites-enabled/default.tmp /etc/nginx/sites-enabled/default
+
+# Проверяем конфиг nginx
+echo "=== Testing nginx config ==="
+nginx -t || exit 1
+
+# Ждём MySQL
+echo "Waiting for MySQL..."
+sleep 5
 
 # Проверяем подключение к БД
-echo "Testing MySQL connection..."
 php artisan tinker --execute="
 try {
     \$pdo = DB::connection()->getPdo();
     echo 'MySQL connection: OK\n';
-    echo 'Database: ' . \$pdo->query('SELECT DATABASE()')->fetchColumn() . '\n';
 } catch (Exception \$e) {
     echo 'MySQL connection: FAILED - ' . \$e->getMessage() . '\n';
     exit(1);
@@ -54,15 +66,19 @@ try {
 echo "Running migrations..."
 php artisan migrate --force --no-interaction
 
-# Заполняем тестовые данные (только если таблица films пустая)
+# Заполняем тестовые данные
 echo "Checking if seeding is needed..."
 php artisan tinker --execute="
-if (\App\Models\Film::count() === 0) {
-    echo 'Seeding database...\n';
-    Artisan::call('db:seed', ['--class' => 'BazaSeeder', '--force' => true]);
-    echo 'Seeding completed.\n';
-} else {
-    echo 'Database already has data, skipping seed.\n';
+try {
+    if (\App\Models\Film::count() === 0) {
+        echo 'Seeding database...\n';
+        Artisan::call('db:seed', ['--class' => 'BazaSeeder', '--force' => true]);
+        echo 'Seeding completed.\n';
+    } else {
+        echo 'Database already has data.\n';
+    }
+} catch (Exception \$e) {
+    echo 'Seed error: ' . \$e->getMessage() . '\n';
 }
 "
 
