@@ -27,11 +27,11 @@ class AboutUsResource extends Resource
         return $form->schema([
             Forms\Components\Section::make('Информация о студии')
                 ->schema([
-                    Forms\Components\FileUpload::make('cover')
+                    Forms\Components\Textarea::make('cover')
                         ->label('Общее фото')
-                        ->image()
-                        ->directory('about/cover')
-                        ->required(),
+                        ->rows(10)
+                        ->required()
+                        ->helperText('Ссылка на фотографию'),
                     Forms\Components\Textarea::make('info')
                         ->label('Текстовая информация')
                         ->rows(10)
