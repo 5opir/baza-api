@@ -2,7 +2,7 @@
 
 # Устанавливаем переменные окружения
 export APP_ENV=production
-export APP_DEBUG=false  # Верните в false после проверки
+export APP_DEBUG=false
 
 # Создаём .env файл
 cat > .env << EOF
@@ -27,15 +27,23 @@ LOG_CHANNEL=stderr
 LOG_LEVEL=error
 EOF
 
-# ВАЖНО: Ждём, пока MySQL будет готов
-echo "Waiting for MySQL to be ready..."
-sleep 5
+# ВАЖНО: Очищаем кеш конфига
+echo "Clearing config cache..."
+php artisan config:clear
+php artisan cache:clear
+
+# Проверяем, что .env создан правильно
+echo "=== .env DB settings ==="
+cat .env | grep -E "^DB_"
+echo "========================"
 
 # Проверяем подключение к БД
+echo "Testing MySQL connection..."
 php artisan tinker --execute="
 try {
-    DB::connection()->getPdo();
+    \$pdo = DB::connection()->getPdo();
     echo 'MySQL connection: OK\n';
+    echo 'Database: ' . \$pdo->query('SELECT DATABASE()')->fetchColumn() . '\n';
 } catch (Exception \$e) {
     echo 'MySQL connection: FAILED - ' . \$e->getMessage() . '\n';
     exit(1);

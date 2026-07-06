@@ -5,10 +5,12 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        'https://aesthetic-parfait-fe1d13.netlify.app',
-        'http://localhost:3000',  // для локальной разработки
-    ],
+    //'allowed_origins' => [
+    //    'https://aesthetic-parfait-fe1d13.netlify.app',
+    //    'http://localhost:3000',
+    //],
+
+    'allowed_origins' => ['*'],
 
     'allowed_origins_patterns' => [],
 
