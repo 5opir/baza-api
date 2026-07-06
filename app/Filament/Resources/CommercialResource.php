@@ -47,7 +47,7 @@ class CommercialResource extends Resource
                         ->rows(10)
                         ->required()
                         ->helperText('Ссылка на превью'),
-                    Forms\Components\Textarea::make('video_url')
+                    Forms\Components\TextInput::make('video_url')
                         ->label('URL видео')
                         ->url()
                         ->helperText('Ссылка на YouTube или другой видеохостинг'),
