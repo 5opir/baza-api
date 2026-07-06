@@ -27,10 +27,11 @@ class ArticleResource extends Resource
                 ->label('Заголовок')
                 ->required()
                 ->maxLength(255),
-            Forms\Components\FileUpload::make('cover')
+            Forms\Components\TextInput::make('cover')
                 ->label('Обложка')
-                ->image()
-                ->directory('articles/covers'),
+                ->rows(10)
+                ->required()
+                ->helperText('Ссылка на обложку'),
             Forms\Components\TextInput::make('url')
                 ->label('Ссылка на статью')
                 ->url()

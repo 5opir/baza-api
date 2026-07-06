@@ -45,15 +45,16 @@ class FilmResource extends Resource
 
             Forms\Components\Section::make('Медиа')
                 ->schema([
-                    Forms\Components\FileUpload::make('cover')
+                    Forms\Components\TextInput::make('cover')
                         ->label('Обложка')
-                        ->image()
-                        ->directory('films/covers')
-                        ->required(),
-                    Forms\Components\FileUpload::make('poster')
+                        ->rows(10)
+                        ->required()
+                        ->helperText('Ссылка на обложку'),
+                    Forms\Components\TextInput::make('poster')
                         ->label('Постер')
-                        ->image()
-                        ->directory('films/posters'),
+                        ->rows(10)
+                        ->required()
+                        ->helperText('Ссылка на постер'),
                     Forms\Components\TextInput::make('trailer_url')
                         ->label('URL трейлера')
                         ->url()
